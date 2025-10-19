@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lucy is missing during the dolcetto o scherzetto</title>
+  
+  <!-- Google Fonts: Creepster -->
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      background: url('firstBack.png') no-repeat center center fixed;
+      background-size: cover;
+      height: 100vh;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      text-align: center;
+      font-family: 'Creepster', cursive;
+    }
+
+    h1 {
+      font-size: 3em;
+      color: #d23a03;
+      text-shadow:
+        0 0 10px #660000,
+        0 0 20px #440000,
+        0 0 30px #220000,
+        0 0 50px #110000;
+      animation: flicker 1.5s infinite;
+      margin-bottom: 10px;
+    }
+
+    p {
+      font-size: 1.5em;
+      color: #8f5d00;
+      text-shadow: 1px 1px 5px black;
+      margin-bottom: 20px;
+    }
+
+    #countdown {
+      font-size: 1.3em;
+      color: #ffcc00;
+      margin-bottom: 30px;
+      text-shadow: 1px 1px 5px black;
+    }
+
+    input {
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      text-align: center;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #b30000;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #8d1d02;
+    }
+
+    #error {
+      color: #fd6a6a;
+      font-weight: bold;
+      margin-top: 10px;
+      display: none;
+    }
+
+    @keyframes shake {
+      0% { transform: translate(0, 0); }
+      25% { transform: translate(-5px, 0); }
+      50% { transform: translate(5px, 0); }
+      75% { transform: translate(-5px, 0); }
+      100% { transform: translate(0, 0); }
+    }
+
+    .shake {
+      animation: shake 0.3s;
+    }
+
+    @keyframes flicker {
+      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+      20%, 22%, 24%, 55% { opacity: 0.5; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Countdown to Halloween -->
+  <div id="countdown">Loading countdown...</div>
+
+  <!-- Background music -->
+  <audio id="bgMusic" loop>
+    <source src="music.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+  <h1>Lucy is missing during the dolcetto o scherzetto</h1>
+  <p>You have to find her before the midnight clock.</p>
+
+  <input type="text" id="password" placeholder="Enter the keyword...">
+  <button onclick="checkPassword()">Unlock the Mystery 🔑</button>
+  <p id="error">⚠️ Wrong keyword... try again!</p>
+
+  <script>
+    const correctPassword = "Lucy is a demon"; // keyword
+    const input = document.getElementById('password');
+    const error = document.getElementById('error');
+    const music = document.getElementById('bgMusic');
+
+    // Password check
+    function checkPassword() {
+      const userInput = input.value.trim();
+      if (userInput === correctPassword) {
+        window.location.href = "game.html";
+      } else {
+        error.style.display = "block";
+        document.body.classList.add("shake");
+        setTimeout(() => document.body.classList.remove("shake"), 300);
+      }
+    }
+
+    // Play music on first mouse movement
+    document.addEventListener('mousemove', () => {
+      music.play().catch(err => console.log("Autoplay blocked by browser."));
+    }, { once: true });
+
+    // Countdown clock for Halloween (Italy time)
+    function updateCountdown() {
+      const now = new Date();
+      const nowUTC = now.getTime() + (now.getTimezoneOffset() * 60000); // local to UTC
+      const italyOffset = 1 * 60 * 60 * 1000; // CET = UTC+1
+      const nowItaly = new Date(nowUTC + italyOffset);
+
+      const halloween = new Date(nowItaly.getFullYear(), 9, 31, 0, 0, 0); // 31 Oct 00:00 CET
+      if (nowItaly > halloween) halloween.setFullYear(halloween.getFullYear() + 1);
+
+      const diff = halloween - nowItaly;
+      const days = Math.floor(diff / (1000*60*60*24));
+      const hours = Math.floor((diff / (1000*60*60)) % 24);
+      const minutes = Math.floor((diff / (1000*60)) % 60);
+      const seconds = Math.floor((diff / 1000) % 60);
+
+      document.getElementById('countdown').innerText =
+        `Time until Halloween: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+    }
+
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+  </script>
+</body>
+</html>
