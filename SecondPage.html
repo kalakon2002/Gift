@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Park of Secrets</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet" />
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.9)),
+        url('ParkCats.png') no-repeat center center fixed;
+      background-size: cover;
+      color: white;
+      font-family: 'Creepster', cursive;
+      text-align: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* === Rain Effect === */
+    .rain {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 2;
+    }
+
+    .raindrop {
+      position: absolute;
+      bottom: 100%;
+      width: 2px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.5);
+      animation: fall linear infinite;
+    }
+
+    @keyframes fall {
+      to {
+        transform: translateY(110vh);
+      }
+    }
+
+    /* === Fog === */
+    .fog {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 50% 80%, rgba(255,255,255,0.08), transparent 70%);
+      animation: fogMove 15s ease-in-out infinite alternate;
+      pointer-events: none;
+      z-index: 3;
+    }
+    @keyframes fogMove {
+      0% { transform: translateX(-15px); }
+      100% { transform: translateX(15px); }
+    }
+
+    /* === Lightning === */
+    .flash {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: white;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    /* === Text & Buttons === */
+    h1 {
+      font-size: 3em;
+      color: #d23a03;
+      text-shadow:
+        0 0 10px #660000,
+        0 0 20px #440000,
+        0 0 30px #220000,
+        0 0 50px #110000;
+      animation: flicker 2s infinite;
+      z-index: 10;
+    }
+
+    p {
+      font-size: 1.5em;
+      color: #ffcc00;
+      text-shadow: 1px 1px 5px black;
+      max-width: 750px;
+      margin-bottom: 20px;
+      z-index: 10;
+    }
+
+    button {
+      padding: 10px 25px;
+      font-size: 1.2em;
+      background-color: #b30000;
+      border: none;
+      color: white;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+      margin: 8px;
+      z-index: 10;
+    }
+
+    button:hover {
+      background-color: #8d1d02;
+      box-shadow: 0 0 15px #ff6600;
+    }
+
+    img.choice {
+      width: 180px;
+      border: 3px solid #b30000;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+      z-index: 10;
+    }
+
+    img.choice:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 20px #ff6600;
+    }
+
+    #messageBox {
+      min-height: 100px;
+      margin-bottom: 20px;
+      z-index: 10;
+    }
+
+    #countdown {
+      color: #ff4444;
+      font-size: 1.3em;
+      margin-top: 15px;
+      display: none;
+      z-index: 10;
+    }
+
+    @keyframes flicker {
+      0%, 18%, 22%, 25%, 53%, 57%, 100% { opacity: 1; }
+      20%, 24%, 55% { opacity: 0.6; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Atmospheric Layers -->
+  <div class="rain" id="rain"></div>
+  <div class="fog"></div>
+  <div class="flash" id="flash"></div>
+
+  <h1>The Park of Secrets</h1>
+
+  <div id="messageBox">
+    <p id="dialogue">Two cats appear in the park. They claim they have seen Lucy...</p>
+  </div>
+
+  <div id="buttons">
+    <button id="next1">Next</button>
+  </div>
+
+  <div id="countdown"></div>
+
+  <audio id="bgMusic" src="music.mp3" autoplay loop></audio>
+
+  <script>
+    const dialogue = document.getElementById('dialogue');
+    const buttonsDiv = document.getElementById('buttons');
+    const countdown = document.getElementById('countdown');
+    const music = document.getElementById('bgMusic');
+    const flash = document.getElementById('flash');
+    const rainContainer = document.getElementById('rain');
+
+    /* === Make Rain Drops === */
+    const numDrops = 120;
+    for (let i = 0; i < numDrops; i++) {
+      const drop = document.createElement('div');
+      drop.classList.add('raindrop');
+      drop.style.left = Math.random() * 100 + 'vw';
+      drop.style.animationDuration = 0.4 + Math.random() * 0.8 + 's';
+      drop.style.animationDelay = Math.random() * 2 + 's';
+      drop.style.opacity = 0.2 + Math.random() * 0.4;
+      rainContainer.appendChild(drop);
+    }
+
+    /* === Thunder and Lightning === */
+    function lightningFlash() {
+      flash.style.opacity = '1';
+      setTimeout(() => { flash.style.opacity = '0'; }, 100);
+    }
+
+    function thunderEffect() {
+      const thunder = new Audio('https://www.fesliyanstudios.com/play-mp3/6516');
+      thunder.volume = 0.6;
+      thunder.play();
+    }
+
+    function randomThunder() {
+      setInterval(() => {
+        if (Math.random() < 0.35) { // every few seconds randomly
+          lightningFlash();
+          setTimeout(thunderEffect, 300 + Math.random() * 1000);
+        }
+      }, 6000);
+    }
+    randomThunder();
+
+    /* === Music Control === */
+    music.volume = 0.4;
+    music.play().catch(err => console.log("Music continuation blocked:", err));
+
+    /* === Dialogue Flow === */
+    document.getElementById('next1').addEventListener('click', () => {
+      dialogue.innerText = "--We are the Lola and Loli brothers, we saw your dog Lucy passing by!";
+      buttonsDiv.innerHTML = '<button id="next2">Next</button>';
+      document.getElementById('next2').addEventListener('click', showTruthLie);
+    });
+
+    function showTruthLie() {
+      dialogue.innerText = "But beware..… one of us always tells the truth, and the other always lies.";
+      buttonsDiv.innerHTML = `
+        <button id="talkLola">Talk with Lola 🐱</button>
+        <button id="talkLoli">Talk with Loli 🐾</button>
+      `;
+      document.getElementById('talkLola').addEventListener('click', talkLola);
+      document.getElementById('talkLoli').addEventListener('click', talkLoli);
+    }
+
+    function talkLola() {
+      dialogue.innerText = "Lola whispers: 'Ask us wisely, traveler... and make your own decision about what road Lucy followed.'";
+      buttonsDiv.innerHTML = `<button id="question">What road, left or right, would your brother say leads to Lucy?</button>`;
+      document.getElementById('question').addEventListener('click', showRiddle);
+    }
+
+    function talkLoli() {
+      dialogue.innerText = "Loli grins: 'Heh... do you really trust cats?'";
+      buttonsDiv.innerHTML = `<button id="question">What would your brother say leads to Lucy?</button>`;
+      document.getElementById('question').addEventListener('click', showRiddle);
+    }
+
+    function showRiddle() {
+      dialogue.innerText = "They both answer at once: 'Left.'";
+      buttonsDiv.innerHTML = `
+        <p>Which road do you choose?</p>
+        <div style="display: flex; justify-content: center; gap: 40px;">
+          <img src="leftPath.png" id="left" alt="Left path" class="choice">
+          <img src="rightPath.png" id="right" alt="Right path" class="choice">
+        </div>
+      `;
+      document.getElementById('left').addEventListener('click', wrongAnswer);
+      document.getElementById('right').addEventListener('click', correctAnswer);
+    }
+
+    function wrongAnswer() {
+      dialogue.innerText = "Both cats burst into laughter... You chose poorly!";
+      buttonsDiv.innerHTML = '';
+      startRetryCountdown();
+    }
+
+    function correctAnswer() {
+      dialogue.innerText = "You chose wisely! The cats nod approvingly and vanish into the mist... You are on the right way.";
+      buttonsDiv.innerHTML = `<button onclick="window.location.href='ThirdPage.html'">Continue ➡️</button>`;
+    }
+
+    function startRetryCountdown() {
+      let timeLeft = 10;
+      countdown.style.display = 'block';
+      countdown.innerText = `Try again in ${timeLeft}s...`;
+      const timer = setInterval(() => {
+        timeLeft--;
+        countdown.innerText = `Try again in ${timeLeft}s...`;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          countdown.style.display = 'none';
+          showRiddle();
+        }
+      }, 1000);
+    }
+  </script>
+</body>
+</html>

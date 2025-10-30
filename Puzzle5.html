@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz 5 – Beethoven Piano Challenge</title>
+<link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
+<style>
+html, body {
+  margin: 0; padding: 0;
+  width: 100%; height: 100%;
+  font-family: 'Creepster', cursive;
+  overflow: hidden;
+  background: url('piano.png') no-repeat center center fixed;
+  background-size: cover;
+  color: white;
+}
+
+/* spooky overlay effects */
+.rain, .thunder {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 2;
+}
+.rain {
+  background-image: linear-gradient(white 2px, transparent 2px);
+  background-size: 2px 100px;
+  opacity: 0.1;
+  animation: rain 0.4s linear infinite;
+}
+@keyframes rain { from { background-position: 0 -100px; } to { background-position: 0 100px; } }
+.thunder {
+  background: white; opacity: 0;
+  animation: lightning 10s infinite;
+}
+@keyframes lightning {
+  0%,97%,100% {opacity:0;}
+  98% {opacity:0.5;}
+  99% {opacity:0.1;}
+}
+
+/* intro */
+#intro {
+  position: absolute; top:0; left:0; width:100%; height:100%;
+  background: rgba(0,0,0,0.85);
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  z-index: 5; text-align: center;
+}
+#intro h1 { font-size: 2em; color: #ffcc00; margin-bottom: 20px; }
+#intro button {
+  font-size: 1.2em; padding: 10px 25px;
+  border: none; border-radius: 10px;
+  background: #b30000; color: white; cursor: pointer;
+}
+
+/* feedback */
+#feedback {
+  position: absolute; top:0; left:0; width:100%; height:100%;
+  background: rgba(0,0,0,0.9);
+  display: none; flex-direction: column;
+  justify-content: center; align-items: center;
+  z-index: 10; text-align: center;
+}
+#feedback h1 { color: #ffcc00; margin-bottom: 20px; }
+#feedback button {
+  font-size: 1.2em; padding: 10px 25px;
+  border: none; border-radius: 10px;
+  background: #b30000; color: white; cursor: pointer;
+}
+
+/* piano */
+#piano {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  height: 150px;
+  display: none;
+}
+.white-key {
+  width: 50px;
+  height: 150px;
+  background: white;
+  border: 1px solid black;
+  float: left;
+  position: relative;
+  z-index: 1;
+  border-radius: 0 0 4px 4px;
+}
+.black-key {
+  width: 30px;
+  height: 90px;
+  background: black;
+  position: absolute;
+  z-index: 2;
+  border-radius: 0 0 3px 3px;
+}
+
+/* black key positions */
+#Csharp { left: 35px; }
+#Dsharp { left: 85px; }
+#Fsharp { left: 185px; }
+#Gsharp { left: 235px; }
+#Asharp { left: 285px; }
+#Csharp2 { left: 385px; }
+#Dsharp2 { left: 435px; }
+#Fsharp2 { left: 535px; }
+#Gsharp2 { left: 585px; }
+#Asharp2 { left: 635px; }
+
+.white-key:active { background: #ddd; }
+.black-key:active { background: #333; }
+</style>
+</head>
+<body>
+
+<div class="rain"></div>
+<div class="thunder"></div>
+
+<div id="intro">
+  <h1>You know music, Indian boy?<br>Play the famous 4 notes of Beethoven’s 5th Symphony!</h1>
+  <button id="startBtn">Start</button>
+</div>
+
+<div id="feedback">
+  <h1 id="feedbackText"></h1>
+  <button id="retryBtn" style="display:none;">Try Again</button>
+  <button id="nextBtn" style="display:none;">Go to Map</button>
+</div>
+
+<!-- Piano -->
+<div id="piano">
+  <!-- White Keys -->
+  <div class="white-key" data-note="C"></div>
+  <div class="white-key" data-note="D"></div>
+  <div class="white-key" data-note="E"></div>
+  <div class="white-key" data-note="F"></div>
+  <div class="white-key" data-note="G"></div>
+  <div class="white-key" data-note="A"></div>
+  <div class="white-key" data-note="B"></div>
+  <div class="white-key" data-note="C2"></div>
+  <div class="white-key" data-note="D2"></div>
+  <div class="white-key" data-note="E2"></div>
+  <div class="white-key" data-note="F2"></div>
+  <div class="white-key" data-note="G2"></div>
+  <div class="white-key" data-note="A2"></div>
+  <div class="white-key" data-note="B2"></div>
+
+  <!-- Black Keys -->
+  <div class="black-key" id="Csharp" data-note="C#"></div>
+  <div class="black-key" id="Dsharp" data-note="Eb"></div>
+  <div class="black-key" id="Fsharp" data-note="F#"></div>
+  <div class="black-key" id="Gsharp" data-note="G#"></div>
+  <div class="black-key" id="Asharp" data-note="A#"></div>
+  <div class="black-key" id="Csharp2" data-note="C#2"></div>
+  <div class="black-key" id="Dsharp2" data-note="Eb2"></div>
+  <div class="black-key" id="Fsharp2" data-note="F#2"></div>
+  <div class="black-key" id="Gsharp2" data-note="G#2"></div>
+  <div class="black-key" id="Asharp2" data-note="A#2"></div>
+</div>
+
+<audio id="bgMusic" src="piano.mp3" loop></audio>
+
+<script>
+const intro = document.getElementById('intro');
+const piano = document.getElementById('piano');
+const feedback = document.getElementById('feedback');
+const feedbackText = document.getElementById('feedbackText');
+const retryBtn = document.getElementById('retryBtn');
+const nextBtn = document.getElementById('nextBtn');
+const bgMusic = document.getElementById('bgMusic');
+
+const correctSequence = ['G', 'G', 'G', 'Eb'];
+let userSequence = [];
+
+// sounds for keys
+const sounds = {};
+const notes = ['C','C#','D','Eb','E','F','F#','G','G#','A','A#','B','C2','Eb2','G2'];
+notes.forEach(n => {
+  sounds[n] = new Audio(`sounds/${n}.mp3`);
+});
+
+document.getElementById('startBtn').addEventListener('click', () => {
+  intro.style.display = 'none';
+  piano.style.display = 'block';
+  bgMusic.play().catch(()=>{});
+});
+
+document.querySelectorAll('.white-key, .black-key').forEach(key => {
+  key.addEventListener('click', () => {
+    const note = key.dataset.note;
+    userSequence.push(note);
+    if (sounds[note]) sounds[note].currentTime = 0, sounds[note].play();
+    if (userSequence.length === correctSequence.length) checkAnswer();
+  });
+});
+
+function checkAnswer() {
+  let correct = correctSequence.every((n,i)=>userSequence[i]===n);
+  if (correct) {
+    feedbackText.textContent = "Ggooood jobb homie! Here is your last key. Go find your dogo.";
+    nextBtn.style.display = 'block';
+  } else {
+    feedbackText.textContent = "The notes are wrong, idiot. Try again.";
+    retryBtn.style.display = 'block';
+  }
+  feedback.style.display = 'flex';
+}
+
+retryBtn.addEventListener('click',()=>{
+  userSequence=[];
+  feedback.style.display='none';
+});
+nextBtn.addEventListener('click',()=>{
+  let keys=parseInt(localStorage.getItem('keys'))||0;
+  keys++; if(keys>5)keys=5;
+  localStorage.setItem('keys',keys);
+  let locked=JSON.parse(localStorage.getItem('lockedPuzzles'))||[];
+  if(!locked.includes(5))locked.push(5);
+  localStorage.setItem('lockedPuzzles',JSON.stringify(locked));
+  window.location.href='MapPage.html';
+});
+</script>
+</body>
+</html>

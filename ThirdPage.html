@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Bar Clue</title>
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      background: url('bar.png') no-repeat center center fixed;
+      background-size: cover;
+      font-family: 'Creepster', cursive;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      overflow: hidden;
+      text-align: center;
+      position: relative;
+    }
+
+    /* === Old TV CRT EFFECT === */
+    .crt-overlay {
+      pointer-events: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        rgba(255,255,255,0.05) 0px,
+        rgba(255,255,255,0.05) 1px,
+        rgba(0,0,0,0) 2px
+      );
+      mix-blend-mode: overlay;
+      z-index: 10;
+      animation: flicker 2s infinite, shake 0.5s infinite;
+    }
+
+    @keyframes flicker {
+      0%, 18%, 22%, 25%, 53%, 57%, 100% { opacity: 0.08; }
+      20%, 24%, 55% { opacity: 0.2; }
+    }
+
+    @keyframes shake {
+      0% { transform: translate(0, 0); }
+      20% { transform: translate(-1px, 1px); }
+      40% { transform: translate(1px, -1px); }
+      60% { transform: translate(-1px, -2px); }
+      80% { transform: translate(2px, 1px); }
+      100% { transform: translate(0, 0); }
+    }
+
+    .scanline {
+      position: fixed;
+      top: -50px;
+      left: 0;
+      width: 100%;
+      height: 50px;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.05), rgba(0,0,0,0));
+      animation: scan 3s linear infinite;
+      z-index: 12;
+      pointer-events: none;
+    }
+
+    @keyframes scan {
+      0% { top: -50px; }
+      100% { top: 100vh; }
+    }
+
+    /* === CONTENT === */
+    .dialogue-box {
+      background: rgba(20, 20, 20, 0.6);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 20px;
+      width: 80%;
+      max-width: 700px;
+      text-shadow: 1px 1px 5px black;
+      z-index: 5;
+    }
+
+    #barman {
+      position: fixed;
+      bottom: 0;
+      left: 30px;
+      width: 500px;
+      display: none;
+      z-index: 4;
+      filter: brightness(0.9);
+    }
+
+    button, .song, .drink {
+      margin-top: 20px;
+      padding: 12px 30px;
+      font-size: 1.2em;
+      background-color: #b30000;
+      border: none;
+      color: white;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover, .song:hover, .drink:hover {
+      background-color: #8d1d02;
+    }
+
+    .choices {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .song, .drink {
+      width: 120px;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.6);
+      border: 2px solid #ffcc00;
+      border-radius: 10px;
+      transition: 0.3s;
+    }
+
+    .drink img {
+      width: 100px;
+      height: 100px;
+      border-radius: 10px;
+    }
+
+    .song.selected, .drink.selected {
+      border: 3px solid #ffcc00;
+      background: #808080;
+    }
+
+    #countdown {
+      font-size: 1.2em;
+      color: #ffcc00;
+      margin-top: 15px;
+      display: none;
+    }
+
+    /* === Glow & Text flicker === */
+    h1, p, button, .song, .drink {
+      text-shadow: 0 0 8px #ffcc00, 0 0 12px #b30000;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0.7) 100%);
+      z-index: 9;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="crt-overlay"></div>
+  <div class="scanline"></div>
+
+  <img id="barman" src="Barman.png" alt="Barman">
+
+  <div class="dialogue-box" id="dialogue">
+    <p>Why was Lucy at CAP10100?</p>
+    <button onclick="nextStep()">Next</button>
+  </div>
+
+  <div class="dialogue-box" id="barmanDialogue" style="display:none;">
+    <p>Hey Isabel, Lucy was here! I’ll give you a map of her next steps if you guess her favorite song and drink correctly. Damn she got wasted earlier. </p>
+    <button onclick="showSongs()">Next</button>
+  </div>
+
+  <div class="dialogue-box" id="songChoice" style="display:none;">
+    <p>Select the song Lucy was listening to:</p>
+    <div class="choices">
+      <div class="song" onclick="chooseSong(event, 'Song1')">Song 1</div>
+      <div class="song" onclick="chooseSong(event, 'Song2')">Song 2</div>
+      <div class="song" onclick="chooseSong(event, 'Song3')">Song 3</div>
+      <div class="song" onclick="chooseSong(event, 'Song4')">Song 4</div>
+    </div>
+    <audio id="songAudio"></audio>
+    <button onclick="showDrinks()">Next</button>
+  </div>
+
+  <div class="dialogue-box" id="drinkChoice" style="display:none;">
+    <p>Now choose what she was drinking:</p>
+    <div class="choices">
+      <div class="drink" onclick="chooseDrink(event, 'Cocacola')"><img src="Cocacola.png" alt="Cocacola"></div>
+      <div class="drink" onclick="chooseDrink(event, 'PPP')"><img src="PPP.png" alt="PPP"></div>
+      <div class="drink" onclick="chooseDrink(event, 'Cocktail')"><img src="Cocktail.png" alt="Cocktail"></div>
+      <div class="drink" onclick="chooseDrink(event, 'Chocolate')"><img src="Chocolate.png" alt="Chocolate"></div>
+    </div>
+    <button onclick="checkAnswer()">Check Answer</button>
+    <p id="countdown"></p>
+  </div>
+
+  <script>
+    const barman = document.getElementById('barman');
+    const dialogue = document.getElementById('dialogue');
+    const barmanDialogue = document.getElementById('barmanDialogue');
+    const songChoice = document.getElementById('songChoice');
+    const drinkChoice = document.getElementById('drinkChoice');
+    const songAudio = document.getElementById('songAudio');
+    const countdownEl = document.getElementById('countdown');
+    let chosenSong = null;
+    let chosenDrink = null;
+
+    function nextStep() {
+      dialogue.style.display = 'none';
+      barman.style.display = 'block';
+      barmanDialogue.style.display = 'block';
+    }
+
+    function showSongs() {
+      barmanDialogue.style.display = 'none';
+      songChoice.style.display = 'block';
+    }
+
+    function chooseSong(event, song) {
+      chosenSong = song;
+      songAudio.src = song + ".mp3";
+      songAudio.play();
+      document.querySelectorAll('.song').forEach(s => s.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+    }
+
+    function showDrinks() {
+      songChoice.style.display = 'none';
+      drinkChoice.style.display = 'block';
+    }
+
+    function chooseDrink(event, drink) {
+      chosenDrink = drink;
+      document.querySelectorAll('.drink').forEach(d => d.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+    }
+
+    function checkAnswer() {
+      if (chosenSong === "Song2" && chosenDrink === "Cocacola") {
+        alert("Correct! The barman hands you the map to Lucy’s next location...");
+        window.location.href = "FourthPage.html";
+      } else {
+        alert("Wrong choice! You’ll need to wait before trying again...");
+        startCountdown(300);
+      }
+    }
+
+    function startCountdown(seconds) {
+      drinkChoice.querySelector("button").disabled = true;
+      countdownEl.style.display = "block";
+      function updateCountdown() {
+        if (seconds <= 0) {
+          countdownEl.innerText = "You can try again now.";
+          drinkChoice.querySelector("button").disabled = false;
+          return;
+        }
+        let min = Math.floor(seconds / 60);
+        let sec = seconds % 60;
+        countdownEl.innerText = `Try again in ${min}:${sec < 10 ? '0' : ''}${sec}`;
+        seconds--;
+        setTimeout(updateCountdown, 1000);
+      }
+      updateCountdown();
+    }
+  </script>
+</body>
+</html>

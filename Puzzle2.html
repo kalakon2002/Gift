@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Haunted Maze - Quiz 2</title>
+<link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Creepster', cursive;
+    background: url('quiz2.png') no-repeat center center fixed;
+    background-size: cover;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    color: white;
+  }
+
+  #intro {
+    margin-top: 80px;
+    text-align: center;
+    background: rgba(0,0,0,0.6);
+    padding: 30px 50px;
+    border-radius: 15px;
+  }
+
+  #intro button {
+    margin-top: 20px;
+    padding: 10px 25px;
+    font-size: 1.2em;
+    border-radius: 10px;
+    border: none;
+    background: #b30000;
+    color: white;
+    cursor: pointer;
+  }
+
+  #maze-wrapper {
+    margin-top: 60px;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0,0,0,0.5);
+    padding: 20px;
+    border-radius: 15px;
+    max-width: 90vw;
+    max-height: 90vh;
+    box-sizing: border-box;
+  }
+
+  #maze {
+    display: grid;
+    grid-template-columns: repeat(20, 25px);
+    grid-template-rows: repeat(20, 25px);
+    gap: 1px;
+  }
+
+  .cell { 
+    width: 25px; height: 25px; box-sizing: border-box; 
+    display: flex; justify-content: center; align-items: center; 
+    font-size: 18px;
+  }
+
+  .wall { background: black; }
+  .path { background: #444; }
+  .player { background: blue; border-radius: 3px; }
+  .exit { background: gold; border-radius: 3px; }
+
+  #message {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    background: rgba(0,0,0,0.9);
+    color: #ffcc00;
+    font-size: 2em;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    text-align: center;
+  }
+
+  #message button {
+    margin-top: 20px;
+    padding: 10px 25px;
+    font-size: 1em;
+    border-radius: 10px;
+    border: none;
+    background: #b30000;
+    color: white;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<!-- 🎵 Background Music -->
+<audio id="bgMusic" src="music.mp3" loop autoplay></audio>
+
+<!-- Intro screen -->
+<div id="intro">
+  <h1>Get out of the maze!</h1>
+  <button onclick="startMaze()">Next</button>
+</div>
+
+<!-- Maze -->
+<div id="maze-wrapper">
+  <div id="maze"></div>
+</div>
+
+<!-- Victory or failure message -->
+<div id="message">
+  <div id="msgText"></div>
+  <button id="goBackBtn" onclick="goBack()">Go Back</button>
+</div>
+
+<script>
+const mazeEl = document.getElementById('maze');
+const mazeWrapper = document.getElementById('maze-wrapper');
+const intro = document.getElementById('intro');
+const message = document.getElementById('message');
+const msgText = document.getElementById('msgText');
+const bgMusic = document.getElementById('bgMusic');
+
+// 🎵 Start music only once
+if (!localStorage.getItem('musicPlaying')) {
+  bgMusic.play().catch(e => console.log('Autoplay blocked:', e));
+  localStorage.setItem('musicPlaying', 'true');
+}
+
+function startMaze() {
+  intro.style.display = 'none';
+  mazeWrapper.style.display = 'flex';
+}
+
+// 20x20 Maze Layout
+const mazeData = [
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+  [1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,1,0,0,0,1],
+  [1,0,1,0,1,0,1,1,1,0,1,0,1,1,0,1,0,1,0,1],
+  [1,0,1,0,0,0,0,0,1,0,1,0,0,0,0,1,0,1,0,1],
+  [1,0,1,0,1,1,1,0,1,0,1,1,1,1,0,1,0,1,0,1],
+  [1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,1,0,1],
+  [1,0,1,1,1,0,1,1,1,1,1,0,1,1,1,1,0,1,0,1],
+  [1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1],
+  [1,0,1,0,1,1,1,1,1,0,1,1,1,1,0,1,0,0,0,1],
+  [1,0,1,0,0,0,0,0,1,0,0,0,0,1,0,1,1,1,0,1],
+  [1,0,1,1,1,1,1,0,1,1,1,1,0,1,0,0,0,1,0,1],
+  [1,0,0,0,0,0,1,0,0,0,0,1,0,1,1,1,0,1,0,1],
+  [1,1,1,1,1,0,1,1,1,1,0,1,0,1,0,0,0,1,0,1],
+  [1,0,0,0,1,0,0,0,0,1,0,0,0,1,0,1,0,0,0,1],
+  [1,0,1,0,1,1,1,1,0,1,1,1,1,1,0,1,0,1,1,1],
+  [1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1],
+  [1,0,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,1],
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+];
+
+let player = {x:1, y:1};
+
+let ghosts = [
+  {x:5, y:2, emoji:'👻'},
+  {x:10, y:5, emoji:'🎃'},
+  {x:15, y:8, emoji:'💀'},
+  {x:7, y:12, emoji:'🕷️'}
+];
+
+function drawMaze(){
+  mazeEl.innerHTML='';
+  for(let y=0;y<mazeData.length;y++){
+    for(let x=0;x<mazeData[y].length;x++){
+      const cell = document.createElement('div');
+      cell.classList.add('cell');
+      if(mazeData[y][x]===1) cell.classList.add('wall');
+      else if(mazeData[y][x]===0) cell.classList.add('path');
+      else if(mazeData[y][x]===2) cell.classList.add('exit');
+
+      if(player.x===x && player.y===y) cell.classList.add('player');
+
+      ghosts.forEach(g=>{
+        if(g.x===x && g.y===y){
+          const span = document.createElement('span');
+          span.textContent = g.emoji;
+          cell.appendChild(span);
+        }
+      });
+
+      mazeEl.appendChild(cell);
+    }
+  }
+}
+
+function movePlayer(dx,dy){
+  const nx = player.x+dx;
+  const ny = player.y+dy;
+  if(mazeData[ny][nx]!==1) player={x:nx,y:ny};
+  checkStatus();
+  drawMaze();
+}
+
+function moveGhosts(){
+  ghosts.forEach(g=>{
+    const dirs=[{x:0,y:-1},{x:0,y:1},{x:-1,y:0},{x:1,y:0}];
+    let dir = dirs[Math.floor(Math.random()*dirs.length)];
+    if(Math.random()<0.5){
+      if(player.x>g.x) dir={x:1,y:0};
+      else if(player.x<g.x) dir={x:-1,y:0};
+      else if(player.y>g.y) dir={x:0,y:1};
+      else if(player.y<g.y) dir={x:0,y:-1};
+    }
+    const nx=g.x+dir.x;
+    const ny=g.y+dir.y;
+    if(mazeData[ny][nx]!==1 && !(nx===player.x && ny===player.y)){ g.x=nx; g.y=ny; }
+  });
+}
+
+function checkStatus(){
+  if(mazeData[player.y][player.x]===2){
+    showMessage("You did it! You got a key!");
+    clearInterval(ghostInterval);
+  }
+
+  ghosts.forEach(g=>{
+    if(g.x===player.x && g.y===player.y){
+      showMessage("A ghost caught you! Try again...");
+      clearInterval(ghostInterval);
+    }
+  });
+}
+
+function showMessage(text){
+  msgText.textContent=text;
+  message.style.display='flex';
+}
+
+function goBack(){
+  message.style.display='none';
+  if(mazeData[player.y][player.x]===2){
+    // ✅ Give key ONLY first time for Quiz 2
+    let lockedPuzzles = JSON.parse(localStorage.getItem('lockedPuzzles')) || [];
+    if (!lockedPuzzles.includes(2)) {
+      lockedPuzzles.push(2);
+      localStorage.setItem('lockedPuzzles', JSON.stringify(lockedPuzzles));
+
+      let keys = parseInt(localStorage.getItem('keys')) || 0;
+      keys++;
+      if (keys > 5) keys = 5;
+      localStorage.setItem('keys', keys);
+    }
+
+    window.location.href = 'MapPage.html';
+  } else {
+    // Restart maze
+    player={x:1,y:1};
+    message.style.display='none';
+    drawMaze();
+    ghostInterval = setInterval(()=>{moveGhosts();drawMaze();},600);
+  }
+}
+
+document.addEventListener('keydown',e=>{
+  if(message.style.display==='flex') return;
+  if(e.key==='ArrowUp') movePlayer(0,-1);
+  else if(e.key==='ArrowDown') movePlayer(0,1);
+  else if(e.key==='ArrowLeft') movePlayer(-1,0);
+  else if(e.key==='ArrowRight') movePlayer(1,0);
+  drawMaze();
+});
+
+let ghostInterval = setInterval(()=>{moveGhosts();drawMaze();},600);
+
+drawMaze();
+</script>
+</body>
+</html>

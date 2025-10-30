@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Barman’s Reward</title>
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      background: #333;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Creepster', cursive;
+      text-align: center;
+    }
+
+    img {
+      width: 250px;
+      margin-bottom: 30px;
+    }
+
+    .dialogue {
+      background: rgba(100, 100, 100, 0.4);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      padding: 20px;
+      width: 80%;
+      max-width: 700px;
+      text-shadow: 1px 1px 5px black;
+    }
+
+    button {
+      margin-top: 25px;
+      padding: 12px 30px;
+      font-size: 1.2em;
+      background-color: #b30000;
+      border: none;
+      color: white;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #8d1d02;
+    }
+  </style>
+</head>
+<body>
+
+  <img src="Barman.png" alt="Barman">
+  <div class="dialogue">
+    <p>You solved the bar puzzle!</p>
+    <p>Here’s the map of Lucy’s footsteps. You must complete 5 puzzles to collect 5 keys.</p>
+    <p>Find all of them to reach Lucy...</p>
+  </div>
+
+  <button onclick="goToMap()">Open the Map 🗺️</button>
+
+  <script>
+    function goToMap() {
+      // Initialize key count in localStorage if not already set
+      if (!localStorage.getItem('keys')) {
+        localStorage.setItem('keys', '0');
+      }
+      window.location.href = 'MapPage.html';
+    }
+  </script>
+</body>
+</html>

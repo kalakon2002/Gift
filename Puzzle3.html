@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catch Candies for Lucy</title>
+<link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
+<style>
+html, body {
+  margin: 0; padding: 0;
+  width: 100%; height: 100%;
+  font-family: 'Creepster', cursive;
+  overflow: hidden;
+  color: white;
+}
+body {
+  background: url('spookyShop1.png') no-repeat center center fixed;
+  background-size: cover;
+  position: relative;
+}
+
+/* Spooky overlays */
+.rain, .thunder {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+.rain {
+  background-image: linear-gradient(white 2px, transparent 2px);
+  background-size: 2px 100px;
+  opacity: 0.1;
+  animation: rain 0.4s linear infinite;
+}
+@keyframes rain { from { background-position: 0 -100px; } to { background-position: 0 100px; } }
+.thunder {
+  background: white;
+  opacity: 0;
+  animation: lightning 10s infinite;
+}
+@keyframes lightning {
+  0%,97%,100% {opacity:0;}
+  98% {opacity:0.5;}
+  99% {opacity:0.1;}
+}
+
+/* Intro screen */
+#intro {
+  position: absolute; top:0; left:0;
+  width:100%; height:100%;
+  background: rgba(0,0,0,0.7);
+  display:flex; flex-direction:column;
+  justify-content:center; align-items:center;
+  z-index:5; text-align:center; padding:20px;
+}
+#intro h1 { font-size:2em; margin-bottom:20px; color:#ffcc00; text-shadow:1px 1px 5px black; }
+#intro button { font-size:1.2em; padding:10px 25px; border:none; border-radius:10px; background:#b30000; color:white; cursor:pointer; }
+
+/* Game elements */
+#gameArea { position: relative; width: 100%; height:100%; }
+#player {
+  position: absolute; bottom:20px; left:50%;
+  width: 160px; height: 210px; z-index:5;
+  transform: translateX(-50%);
+}
+
+/* Shake animation for player */
+@keyframes shake {
+  0% { transform: translateX(-50%) translate(0px,0px); }
+  25% { transform: translateX(-50%) translate(-10px,0px); }
+  50% { transform: translateX(-50%) translate(10px,0px); }
+  75% { transform: translateX(-50%) translate(-10px,0px); }
+  100% { transform: translateX(-50%) translate(0px,0px); }
+}
+.shake { animation: shake 0.3s; }
+
+/* Screen flash for healthy food */
+#flash {
+  position: absolute; top:0; left:0; width:100%; height:100%;
+  background:red; opacity:0; pointer-events:none; z-index:10;
+}
+
+/* Items */
+.item {
+  position: absolute; width:40px; height:40px;
+  font-size:36px; text-align:center; z-index:4;
+}
+
+/* Score */
+#scoreBoard {
+  position: fixed; top:20px; right:30px;
+  font-size:1.5em; color:#ffcc00;
+  text-shadow:1px 1px 5px black;
+  background: rgba(0,0,0,0.5); padding:10px 20px;
+  border-radius:8px; z-index:5;
+}
+</style>
+</head>
+<body>
+
+<div class="rain"></div>
+<div class="thunder"></div>
+
+<!-- Intro -->
+<div id="intro">
+  <h1>Bebel, you have to catch some candies for Lucy.<br>She must be very hungry.<br>Move yourself with the arrow keys!<br><br>You can only miss 3 candies. If you catch a healthy food your score will go down by 1.</h1>
+  <button id="startBtn">Next</button>
+</div>
+
+<!-- Game Area -->
+<div id="gameArea" style="display:none;">
+  <div id="scoreBoard">Score: 0 | Missed: 0</div>
+  <img id="player" src="BebelBag.png" alt="Player">
+  <div id="flash"></div>
+</div>
+<style>
+  #player {
+    position: absolute;
+    width: 120px;      /* adjust width if needed */
+    height: 180px;    /* taller height */
+    left: 400px;
+    top: 380px;
+  }
+</style>
+
+<audio id="bgMusic" src="music.mp3" loop></audio>
+
+<script>
+const intro = document.getElementById('intro');
+const startBtn = document.getElementById('startBtn');
+const gameArea = document.getElementById('gameArea');
+const player = document.getElementById('player');
+const scoreBoard = document.getElementById('scoreBoard');
+const flash = document.getElementById('flash');
+const bgMusic = document.getElementById('bgMusic');
+
+let score = 0;
+let missed = 0;
+const maxScore = 20;
+const maxMissed = 3;
+let items = [];
+let playerSpeed = 50;
+
+// Item types
+const itemTypes = [
+  {type:'candy', content:'🍬', points:1},
+  {type:'healthy', content:'🍎', points:0}
+];
+
+// Start Game
+startBtn.addEventListener('click', () => {
+  intro.style.display = 'none';
+  gameArea.style.display = 'block';
+  bgMusic.play().catch(err=>console.log('Music blocked:', err));
+  setInterval(spawnItem, 800);
+  requestAnimationFrame(gameLoop);
+});
+
+// Player position
+let playerX = gameArea.clientWidth/2;
+
+// Move player with arrows
+document.addEventListener('keydown', e => {
+  const rect = gameArea.getBoundingClientRect();
+  if(e.key === 'ArrowLeft') playerX -= playerSpeed;
+  if(e.key === 'ArrowRight') playerX += playerSpeed;
+  if(playerX < 0) playerX = 0;
+  if(playerX > rect.width - player.offsetWidth) playerX = rect.width - player.offsetWidth;
+  player.style.left = playerX + 'px';
+});
+
+// Spawn items
+function spawnItem() {
+  const itemType = itemTypes[Math.floor(Math.random()*itemTypes.length)];
+  const item = document.createElement('div');
+  item.classList.add('item');
+  item.textContent = itemType.content;
+  item.dataset.points = itemType.points;
+  item.style.left = Math.random() * (gameArea.clientWidth - 40) + 'px';
+  item.style.top = '-50px';
+  gameArea.appendChild(item);
+  items.push(item);
+}
+
+// Game loop
+function gameLoop() {
+  for(let i=items.length-1; i>=0; i--){
+    const item = items[i];
+    let top = parseFloat(item.style.top);
+    top += 4;
+    item.style.top = top + 'px';
+
+    // Collision
+    const playerRect = player.getBoundingClientRect();
+    const itemRect = item.getBoundingClientRect();
+    if(!(playerRect.right < itemRect.left ||
+         playerRect.left > itemRect.right ||
+         playerRect.bottom < itemRect.top ||
+         playerRect.top > itemRect.bottom)){
+
+      const points = parseInt(item.dataset.points);
+      if(points === 1){
+        score += 1;
+      } else {
+        // Healthy food caught
+        score -= 1;
+        if(score < 0) score = 0;
+
+        // Shake player
+        player.classList.add('shake');
+        setTimeout(()=>player.classList.remove('shake'), 300);
+
+        // Flash screen red
+        flash.style.opacity = 0.7;
+        setTimeout(()=>flash.style.opacity = 0, 150);
+      }
+
+      updateScore();
+      item.remove();
+      items.splice(i,1);
+      continue;
+    }
+
+    // Missed candy
+    if(top > gameArea.clientHeight){
+      if(parseInt(item.dataset.points) === 1){
+        missed++;
+        updateScore();
+        if(missed > maxMissed){
+          alert("😢 You missed too many candies! Try again!");
+          location.reload();
+          return;
+        }
+      }
+      item.remove();
+      items.splice(i,1);
+    }
+  }
+
+  if(score >= maxScore){
+    alert("🎉 Yoohooo! Good job! You just earned yourself a candy (sadly not loukoumas). 🎉");
+
+    // Give key for this quiz
+    let keys = parseInt(localStorage.getItem('keys')) || 0;
+    keys++;
+    if(keys>5) keys=5;
+    localStorage.setItem('keys', keys);
+
+    // Lock this puzzle
+    let locked = JSON.parse(localStorage.getItem('lockedPuzzles')) || [];
+    if(!locked.includes(3)) locked.push(3);
+    localStorage.setItem('lockedPuzzles', JSON.stringify(locked));
+
+    window.location.href = 'MapPage.html';
+  } else {
+    requestAnimationFrame(gameLoop);
+  }
+}
+
+function updateScore() {
+  scoreBoard.textContent = `Score: ${score} | Missed: ${missed}`;
+}
+</script>
+</body>
+</html>

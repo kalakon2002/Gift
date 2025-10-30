@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>First Page - The Search for Lucy</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      background: url('FirstPageBack.png') no-repeat center center fixed;
+      background-size: cover;
+      color: white;
+      font-family: 'Creepster', cursive;
+      text-align: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    h1 {
+      margin-top: 80px;
+      font-size: 3em;
+      color: #d23a03;
+      text-shadow:
+        0 0 10px #660000,
+        0 0 20px #440000,
+        0 0 30px #220000,
+        0 0 50px #110000;
+      margin-bottom: 20px;
+      animation: flicker 2s infinite;
+      z-index: 2;
+      position: relative;
+    }
+
+    p {
+      font-size: 1.5em;
+      color: #ffcc00;
+      text-shadow: 1px 1px 5px black;
+      max-width: 700px;
+      margin: 0 auto 40px auto;
+      line-height: 1.4;
+      z-index: 2;
+      position: relative;
+    }
+
+    button {
+      padding: 12px 30px;
+      font-size: 1.2em;
+      background-color: #b30000;
+      border: none;
+      color: white;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+      z-index: 2;
+      position: relative;
+    }
+
+    button:hover {
+      background-color: #8d1d02;
+    }
+
+    @keyframes flicker {
+      0%, 18%, 22%, 25%, 53%, 57%, 100% { opacity: 1; }
+      20%, 24%, 55% { opacity: 0.6; }
+    }
+
+    /* Actual rain */
+    .raindrop {
+      position: absolute;
+      top: -10px;
+      width: 2px;
+      height: 15px;
+      background: rgba(255, 255, 255, 0.6);
+      animation: fall linear infinite;
+    }
+
+    @keyframes fall {
+      0% { transform: translateY(0); opacity: 1; }
+      100% { transform: translateY(100vh); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background music -->
+  <audio id="bgMusic" src="music.mp3" autoplay loop></audio>
+
+  <h1>The Night Deepens...</h1>
+  <p>
+     LUCY IS COLD AND WET. SHE FOUND A SAFE PLACE IN TORINO AND WAITING FOR THE STUPID BITCH ASS NIGGA OWNER WHO CANT WALK TO FIND HER... What is that? footsteps?
+  </p>
+
+  <button onclick="window.location.href='SecondPage.html'">Follow the Footsteps ➡️</button>
+
+  <!-- Rain container -->
+  <div id="rain"></div>
+
+  <script>
+    // Continue music playback if possible
+    const music = document.getElementById('bgMusic');
+    music.play().catch(err => console.log("Music continuation blocked:", err));
+
+    // Generate rain drops
+    const rainContainer = document.getElementById('rain');
+    const numberOfDrops = 100;
+
+    for(let i = 0; i < numberOfDrops; i++) {
+      const drop = document.createElement('div');
+      drop.className = 'raindrop';
+      drop.style.left = Math.random() * 100 + 'vw';
+      drop.style.animationDuration = 0.5 + Math.random() * 0.5 + 's';
+      drop.style.animationDelay = Math.random() * 5 + 's';
+      drop.style.height = 10 + Math.random() * 20 + 'px';
+      rainContainer.appendChild(drop);
+    }
+  </script>
+</body>
+</html>
