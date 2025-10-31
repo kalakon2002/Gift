@@ -154,7 +154,7 @@ ingredients.forEach(ing => {
 finishShop.addEventListener('click', () => {
   shop.style.display = 'none';
   finalBoard.style.display = 'flex';
-  finalMessage.innerHTML = `I hope that your gluttony did not affect your points that much.<br>Here is your key!<br>Remaining points: ${points} <br> We will go out and we will eat the shit that you just ordered tho. <br> The points left, will be a mysterious giftt` ;
+  finalMessage.innerHTML = `I hope that your gluttony did not affect your points that much.<br>Here is your key!<br>Remaining points: ${points} <br> We will go out and we will eat the shit that you just ordered tho. <br> The points left, will be a mysterious giftt`;
 
   // Give key for this quiz
   let keys = parseInt(localStorage.getItem('keys')) || 0;
@@ -173,6 +173,11 @@ goToMap.addEventListener('click', () => {
   window.location.href = 'MapPage.html';
 });
 </script>
+
+<!-- Background Music -->
+<audio autoplay loop>
+  <source src="hallo.mp3" type="audio/mpeg">
+</audio>
 
 </body>
 </html>
